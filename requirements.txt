@@ -1,0 +1,4 @@
+rick_db>=1.1.2
+rick>=0.6.0
+pokie>=0.4.0
+setuptools>=60.0.0
