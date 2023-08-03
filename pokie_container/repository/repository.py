@@ -28,7 +28,7 @@ class NodeTypeRepository(Repository):
     def get_all_ordered(self, id_tree_type: int) -> List[NodeTypeRecord]:
         qry = (
             self.select()
-            .where(NodeTypeRecord.tree_type, '=', id_tree_type)
+            .where(NodeTypeRecord.tree_type, "=", id_tree_type)
             .order(NodeTypeRecord.label)
         )
         return self.fetch(qry)
@@ -47,7 +47,9 @@ class NodeRepository(Repository):
         )
         return self.fetch(qry)
 
-    def find_by_src(self, id_tenant: int, id_tree_type: int, src: int) -> Optional[NodeRecord]:
+    def find_by_src(
+        self, id_tenant: int, id_tree_type: int, src: int
+    ) -> Optional[NodeRecord]:
         qry = (
             self.select()
             .where(NodeRecord.tenant, "=", id_tenant)
@@ -62,11 +64,11 @@ class NodeTreeRepository(Repository):
         super().__init__(db, NodeTreeRecord)
 
     def add_node(
-            self,
-            id_tenant: int,
-            id_tree_type: int,
-            id_node: int,
-            id_parent_node: Union[List, int] = 0,
+        self,
+        id_tenant: int,
+        id_tree_type: int,
+        id_node: int,
+        id_parent_node: Union[List, int] = 0,
     ) -> bool:
         if isinstance(id_parent_node, int):
             id_parent_node = [id_parent_node]
@@ -106,7 +108,7 @@ class NodeTreeRepository(Repository):
         return True
 
     def get_by_node(
-            self, id_tenant: int, id_tree_type:int, id_node: int
+        self, id_tenant: int, id_tree_type: int, id_node: int
     ) -> Optional[NodeTreeRecord]:
         qry = (
             self.select()
@@ -117,7 +119,7 @@ class NodeTreeRepository(Repository):
         )
         return self.fetch_one(qry)
 
-    def get_parents(self, id_tenant: int, id_tree_type:int, id_node: int) -> List:
+    def get_parents(self, id_tenant: int, id_tree_type: int, id_node: int) -> List:
         """
         Get immediate parent node ids
         :param id_tenant:
@@ -137,7 +139,7 @@ class NodeTreeRepository(Repository):
             result.append(row.parent)
         return result
 
-    def get_children(self, id_tenant: int, id_tree_type:int, id_node: int) -> List:
+    def get_children(self, id_tenant: int, id_tree_type: int, id_node: int) -> List:
         """
         Get immediate children node ids
         :param id_tenant:
@@ -158,7 +160,7 @@ class NodeTreeRepository(Repository):
         return result
 
     def add_parent(
-            self, id_tenant: int, id_tree_type:int, id_node: int, id_parent: int
+        self, id_tenant: int, id_tree_type: int, id_node: int, id_parent: int
     ) -> bool:
         """
         Add a parent to a node
@@ -173,8 +175,8 @@ class NodeTreeRepository(Repository):
         if id_parent in self.get_parents(id_tenant, id_tree_type, id_node):
             return False
 
-        node = self.get_by_node(id_tenant,id_tree_type, id_node)
-        parent = self.get_by_node(id_tenant,id_tree_type, id_parent)
+        node = self.get_by_node(id_tenant, id_tree_type, id_node)
+        parent = self.get_by_node(id_tenant, id_tree_type, id_parent)
         if node is None or parent is None:
             return False
 
@@ -210,7 +212,7 @@ class NodeTreeRepository(Repository):
         return True
 
     def delete_parent(
-            self, id_tenant: int, id_tree_type:int, id_node: int, id_parent: int
+        self, id_tenant: int, id_tree_type: int, id_node: int, id_parent: int
     ) -> bool:
         """
         Remove a parent from a node
@@ -263,7 +265,7 @@ class NodeTreeRepository(Repository):
         self._db.commit()
         return True
 
-    def get_all_children(self, id_tenant: int, id_tree_type:int, id_node: int) -> List:
+    def get_all_children(self, id_tenant: int, id_tree_type: int, id_node: int) -> List:
         """
         Get all node ids for the children subtree of id_node
         :param id_tenant:
@@ -283,7 +285,7 @@ class NodeTreeRepository(Repository):
             result.append(row.child)
         return result
 
-    def get_all_parents(self, id_tenant: int, id_tree_type:int, id_node: int) -> List:
+    def get_all_parents(self, id_tenant: int, id_tree_type: int, id_node: int) -> List:
         """
         Get all node ids for the parents of the tree upto id_node
 
@@ -304,7 +306,9 @@ class NodeTreeRepository(Repository):
             result.append(row.parent)
         return result
 
-    def get_all_children_parents(self, id_tenant: int, id_tree_type:int, id_node: int) -> List:
+    def get_all_children_parents(
+        self, id_tenant: int, id_tree_type: int, id_node: int
+    ) -> List:
         """
         Return all node ids in path above and below id_node
 
@@ -317,7 +321,7 @@ class NodeTreeRepository(Repository):
         result.extend(self.get_parents(id_tenant, id_tree_type, id_node))
         return result
 
-    def delete_node(self, id_tenant: int, id_tree_type:int, id_node: int) -> bool:
+    def delete_node(self, id_tenant: int, id_tree_type: int, id_node: int) -> bool:
         """
         Removes a node from the tree
         The node must not have children
@@ -331,14 +335,16 @@ class NodeTreeRepository(Repository):
         if len(children) > 0:
             return False
 
-        self.delete_where([
-            (NodeTreeRecord.tenant, "=", id_tenant),
-            (NodeTreeRecord.tree_type, "=", id_tree_type),
-            (NodeTreeRecord.child, "=", id_node),
-        ])
+        self.delete_where(
+            [
+                (NodeTreeRecord.tenant, "=", id_tenant),
+                (NodeTreeRecord.tree_type, "=", id_tree_type),
+                (NodeTreeRecord.child, "=", id_node),
+            ]
+        )
         return True
 
-    def get_tree(self, id_tenant:int, id_tree_type:int):
+    def get_tree(self, id_tenant: int, id_tree_type: int):
         """
         Get complete tree in iterable format
 
@@ -359,30 +365,43 @@ class NodeTreeRepository(Repository):
         """
         tn = self._tablename
         qry = (
-                Select(self._dialect).from_(
-                    {tn:"a"},
-                    cols={
-                        NodeTreeRecord.parent:None,
-                        NodeTreeRecord.depth: None,
-                        Literal("array(SELECT child FROM {tn} as sub WHERE sub.parent = a.parent AND is_child )".format(tn=tn)):"children",
-                        Literal("array(SELECT parent FROM {tn} as sub WHERE sub.child = a.parent AND is_child )".format(tn=tn)): "parents",
-                        Literal("array(SELECT child FROM {tn} as sub WHERE sub.parent = a.parent )".format(tn=tn)):"nodes"
-                    },
-                    schema=self._schema
-                )
-                .where(NodeTreeRecord.tenant, '=', id_tenant)
-                .where(NodeTreeRecord.tree_type, '=', id_tree_type)
-                .where(NodeTreeRecord.parent, '=', Literal("a.child"))
-                .order(NodeTreeRecord.depth)
+            Select(self._dialect)
+            .from_(
+                {tn: "a"},
+                cols={
+                    NodeTreeRecord.parent: None,
+                    NodeTreeRecord.depth: None,
+                    Literal(
+                        "array(SELECT child FROM {tn} as sub WHERE sub.parent = a.parent AND is_child )".format(
+                            tn=tn
+                        )
+                    ): "children",
+                    Literal(
+                        "array(SELECT parent FROM {tn} as sub WHERE sub.child = a.parent AND is_child )".format(
+                            tn=tn
+                        )
+                    ): "parents",
+                    Literal(
+                        "array(SELECT child FROM {tn} as sub WHERE sub.parent = a.parent )".format(
+                            tn=tn
+                        )
+                    ): "nodes",
+                },
+                schema=self._schema,
+            )
+            .where(NodeTreeRecord.tenant, "=", id_tenant)
+            .where(NodeTreeRecord.tree_type, "=", id_tree_type)
+            .where(NodeTreeRecord.parent, "=", Literal("a.child"))
+            .order(NodeTreeRecord.depth)
         )
         result = {}
         with self._db.cursor() as c:
             sql, values = qry.assemble()
             for row in c.fetchall(sql, values):
-                result[row['parent']] = {
-                    'children': row['children'],
-                    'parents': row['parents'],
-                    'nodes': row['nodes'],
-                    'depth': row['depth']
+                result[row["parent"]] = {
+                    "children": row["children"],
+                    "parents": row["parents"],
+                    "nodes": row["nodes"],
+                    "depth": row["depth"],
                 }
         return result

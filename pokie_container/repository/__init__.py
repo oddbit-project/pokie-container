@@ -1,1 +1,6 @@
-from .repository import TreeTypeRepository, NodeTypeRepository, NodeTreeRepository, NodeRepository
+from .repository import (
+    TreeTypeRepository,
+    NodeTypeRepository,
+    NodeTreeRepository,
+    NodeRepository,
+)

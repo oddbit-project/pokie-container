@@ -4,14 +4,22 @@ from pokie.constants import DI_DB
 from rick.mixin import Injectable
 from rick.util.datetime import iso8601_now
 
-from pokie_container.dto import TreeTypeRecord, NodeTypeRecord, NodeRecord, NodeTreeRecord
+from pokie_container.dto import (
+    TreeTypeRecord,
+    NodeTypeRecord,
+    NodeRecord,
+    NodeTreeRecord,
+)
 from pokie_container.errors import NodeTypeNotFoundError, NodeNotFoundError, NodeError
-from pokie_container.repository.repository import NodeRepository, NodeTreeRepository, NodeTypeRepository, \
-    TreeTypeRepository
+from pokie_container.repository.repository import (
+    NodeRepository,
+    NodeTreeRepository,
+    NodeTypeRepository,
+    TreeTypeRepository,
+)
 
 
 class ContainerService(Injectable):
-
     def get_tree_type_list(self) -> List[TreeTypeRecord]:
         """
         Retrieve a list of tree types
@@ -42,7 +50,9 @@ class ContainerService(Injectable):
         """
         return self.repo_node_type().get_all_ordered(id_tree_type)
 
-    def add_node_type(self, id_tree_type: int, id_node_type: int, label: str) -> NodeTypeRecord:
+    def add_node_type(
+        self, id_tree_type: int, id_node_type: int, label: str
+    ) -> NodeTypeRecord:
         """
         Create a node type
 
@@ -51,11 +61,7 @@ class ContainerService(Injectable):
         :param label:
         :return:
         """
-        record = NodeTypeRecord(
-            id=id_node_type,
-            tree_type=id_tree_type,
-            label=label
-        )
+        record = NodeTypeRecord(id=id_node_type, tree_type=id_tree_type, label=label)
         self.repo_node_type().insert(record)
         return record
 
@@ -102,12 +108,18 @@ class ContainerService(Injectable):
         if record is None:
             return None
         return {
-            'record': record,
-            'parents': self.repo_tree().get_parents(record.tenant, record.tree_type, record.id),
-            'children': self.repo_tree().get_children(record.tenant, record.tree_type, record.id),
+            "record": record,
+            "parents": self.repo_tree().get_parents(
+                record.tenant, record.tree_type, record.id
+            ),
+            "children": self.repo_tree().get_children(
+                record.tenant, record.tree_type, record.id
+            ),
         }
 
-    def get_node_src(self, id_tenant: int, id_tree_type: int, src: int) -> Optional[NodeRecord]:
+    def get_node_src(
+        self, id_tenant: int, id_tree_type: int, src: int
+    ) -> Optional[NodeRecord]:
         """
         Find a node by src
 
@@ -118,7 +130,9 @@ class ContainerService(Injectable):
         """
         return self.repo_node().find_by_src(id_tenant, id_tree_type, src)
 
-    def get_all_node_children_id(self, id_tenant: int, id_tree_type: int, id_node: int) -> List[int]:
+    def get_all_node_children_id(
+        self, id_tenant: int, id_tree_type: int, id_node: int
+    ) -> List[int]:
         """
         Get all node ids for the children subtree of id_node
 
@@ -129,7 +143,9 @@ class ContainerService(Injectable):
         """
         return self.repo_tree().get_all_children(id_tenant, id_tree_type, id_node)
 
-    def get_all_node_parents_id(self, id_tenant: int, id_tree_type: int, id_node: int) -> List[int]:
+    def get_all_node_parents_id(
+        self, id_tenant: int, id_tree_type: int, id_node: int
+    ) -> List[int]:
         """
         Get all node ids for the parents of the tree upto id_node
 
@@ -140,7 +156,9 @@ class ContainerService(Injectable):
         """
         return self.repo_tree().get_all_parents(id_tenant, id_tree_type, id_node)
 
-    def get_children_id(self, id_tenant: int, id_tree_type: int, id_node: int) -> List[int]:
+    def get_children_id(
+        self, id_tenant: int, id_tree_type: int, id_node: int
+    ) -> List[int]:
         """
         Get immediate children node ids
 
@@ -151,7 +169,9 @@ class ContainerService(Injectable):
         """
         return self.repo_tree().get_children(id_tenant, id_tree_type, id_node)
 
-    def get_parents_id(self, id_tenant: int, id_tree_type: int, id_node: int) -> List[int]:
+    def get_parents_id(
+        self, id_tenant: int, id_tree_type: int, id_node: int
+    ) -> List[int]:
         """
         Get immediate parent node ids
 
@@ -162,7 +182,9 @@ class ContainerService(Injectable):
         """
         return self.repo_tree().get_parents(id_tenant, id_tree_type, id_node)
 
-    def get_node_subtree_id(self, id_tenant: int, id_tree_type: int, id_node: int) -> List[int]:
+    def get_node_subtree_id(
+        self, id_tenant: int, id_tree_type: int, id_node: int
+    ) -> List[int]:
         """
         Return all node ids in path above and below id_node
 
@@ -171,11 +193,19 @@ class ContainerService(Injectable):
         :param id_node:
         :return:
         """
-        return self.repo_tree().get_all_children_parents(id_tenant, id_tree_type, id_node)
+        return self.repo_tree().get_all_children_parents(
+            id_tenant, id_tree_type, id_node
+        )
 
-    def add_node(self, id_tenant: int, id_node_type: int, label: str, id_parents: Union[int, List] = None,
-                 src: int = None,
-                 attributes: dict = None) -> NodeRecord:
+    def add_node(
+        self,
+        id_tenant: int,
+        id_node_type: int,
+        label: str,
+        id_parents: Union[int, List] = None,
+        src: int = None,
+        attributes: dict = None,
+    ) -> NodeRecord:
         """
         Creates a new node and adds it to the tree
 
@@ -189,7 +219,9 @@ class ContainerService(Injectable):
         """
         node_type = self.repo_node_type().fetch_pk(id_node_type)  # type: NodeTypeRecord
         if not node_type:
-            raise NodeTypeNotFoundError("invalid node type: {}".format(str(id_node_type)))
+            raise NodeTypeNotFoundError(
+                "invalid node type: {}".format(str(id_node_type))
+            )
 
         if not attributes:
             attributes = {}
@@ -208,7 +240,7 @@ class ContainerService(Injectable):
             updated=now,
             src=src,
             label=label,
-            attributes=attributes
+            attributes=attributes,
         )
         record.id = self.repo_node().insert_pk(record)
         self.repo_tree().add_node(id_tenant, record.tree_type, record.id, id_parents)
@@ -227,7 +259,9 @@ class ContainerService(Injectable):
         node = self.repo_node().fetch_pk(id_node)  # type: NodeRecord
         if node is None:
             return False
-        return self.repo_tree().add_parent(node.tenant, node.tree_type, id_node, id_parent)
+        return self.repo_tree().add_parent(
+            node.tenant, node.tree_type, id_node, id_parent
+        )
 
     def remove_node_parent(self, id_node: int, id_parent: int) -> bool:
         """
@@ -240,7 +274,9 @@ class ContainerService(Injectable):
         node = self.repo_node().fetch_pk(id_node)  # type: NodeRecord
         if node is None:
             return False
-        return self.repo_tree().delete_parent(node.tenant, node.tree_type, id_node, id_parent)
+        return self.repo_tree().delete_parent(
+            node.tenant, node.tree_type, id_node, id_parent
+        )
 
     def update_node(self, record: NodeRecord):
         """
@@ -268,7 +304,9 @@ class ContainerService(Injectable):
 
         self.repo_node().delete_pk(id_node)
 
-    def get_node_tree(self, id_tenant: int, id_tree_type: int, fetch_records=False) -> dict:
+    def get_node_tree(
+        self, id_tenant: int, id_tree_type: int, fetch_records=False
+    ) -> dict:
         """
         Fetches a tree
 
