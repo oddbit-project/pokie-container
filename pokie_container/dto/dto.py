@@ -1,34 +1,37 @@
 from rick_db import fieldmapper
 
 
-@fieldmapper(tablename="container_tree_type", pk="id_container_tree_type")
+@fieldmapper(tablename="node_tree_type", pk="id_node_tree_type")
 class TreeTypeRecord:
-    id = "id_container_tree_type"
+    id = "id_node_tree_type"
     label = "label"
 
 
-@fieldmapper(tablename="container_type", pk="id_container_type")
-class ContainerTypeRecord:
-    id = "id_container_type"
+@fieldmapper(tablename="node_type", pk="id_node_type")
+class NodeTypeRecord:
+    id = "id_node_type"
+    tree_type = "fk_node_tree_type"
     label = "label"
 
 
-@fieldmapper(tablename="container", pk="id_container")
-class ContainerRecord:
-    id = "id_container"
+@fieldmapper(tablename="node", pk="id_node")
+class NodeRecord:
+    id = "id_node"
     tenant = "fk_tenant"
-    tree_type = "fk_container_tree_type"
-    container_type = "fk_container_type"
+    tree_type = "fk_node_tree_type"
+    node_type = "fk_node_type"
+    created = "created_at"
+    updated = "updated_at"
     src = "src"
     label = "label"
     attributes = "attributes"
 
 
-@fieldmapper(tablename="container_tree", pk="id_container_tree")
-class ContainerTreeRecord:
-    id = "id_container_tree"
+@fieldmapper(tablename="node_tree", pk="id_node_tree")
+class NodeTreeRecord:
+    id = "id_node_tree"
     tenant = "fk_tenant"
-    tree_type = "fk_container_tree_type"
+    tree_type = "fk_node_tree_type"
     parent = "parent"
     child = "child"
     is_child = "is_child"

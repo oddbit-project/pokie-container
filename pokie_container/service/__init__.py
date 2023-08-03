@@ -1,1 +1,1 @@
-from .container import GroupService
+from .container import ContainerService
