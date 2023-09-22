@@ -36,7 +36,7 @@ class TestPlatform:
     def test_node_type(self, svc_container):
         records = svc_container.get_node_type_list(TREE_DEFAULT)
         assert len(records) == 1
-        assert isinstance(records[0], NodeTypeRecord) is True
+        assert isinstance(records[0], NodeTypeRecord)
 
         # add a custom node type
         id_type = 10
@@ -44,11 +44,11 @@ class TestPlatform:
 
         node_type = svc_container.add_node_type(TREE_DEFAULT, id_type, label)
         assert node_type is not None
-        assert isinstance(node_type, NodeTypeRecord) is True
+        assert isinstance(node_type, NodeTypeRecord)
 
         records = svc_container.get_node_type_list(TREE_DEFAULT)
         assert len(records) == 2
-        assert isinstance(records[1], NodeTypeRecord) is True
+        assert isinstance(records[1], NodeTypeRecord)
 
         node = records[1]
         assert node.id == id_type
@@ -75,15 +75,13 @@ class TestPlatform:
         # create 10 nodes at root level, 5 nodes at second level
         nodes = {}
         for i in range(0, 10):
-            record = svc_container.add_node(
-                0, id_node_type, "root node {}".format(str(i))
-            )
+            record = svc_container.add_node(0, id_node_type, f"root node {str(i)}")
             nodes[record.id] = []
             for j in range(0, 2):
                 child = svc_container.add_node(
                     0,
                     id_node_type,
-                    "child node {} for node {}".format(str(j), str(i)),
+                    f"child node {str(j)} for node {str(i)}",
                     id_parents=record.id,
                 )
                 nodes[record.id].append(child.id)

@@ -90,7 +90,7 @@ class NodeTreeRepository(Repository):
                     tree_type=id_tree_type,
                     parent=row.parent,
                     child=id_node,
-                    is_child=True if (row.parent == row.child) else False,
+                    is_child=row.parent == row.child,
                     depth=row.depth,
                 )
                 self.insert(record)
@@ -134,10 +134,7 @@ class NodeTreeRepository(Repository):
             .where(NodeTreeRecord.child, "=", id_node)
             .where(NodeTreeRecord.is_child, "=", True)
         )
-        result = []
-        for row in self.fetch(qry):
-            result.append(row.parent)
-        return result
+        return [row.parent for row in self.fetch(qry)]
 
     def get_children(self, id_tenant: int, id_tree_type: int, id_node: int) -> List:
         """
@@ -154,10 +151,7 @@ class NodeTreeRepository(Repository):
             .where(NodeTreeRecord.parent, "=", id_node)
             .where(NodeTreeRecord.is_child, "=", True)
         )
-        result = []
-        for row in self.fetch(qry):
-            result.append(row.child)
-        return result
+        return [row.child for row in self.fetch(qry)]
 
     def add_parent(
         self, id_tenant: int, id_tree_type: int, id_node: int, id_parent: int
@@ -204,7 +198,7 @@ class NodeTreeRepository(Repository):
                 tree_type=id_tree_type,
                 parent=row.parent,
                 child=id_node,
-                is_child=True if (row.parent == row.child) else False,
+                is_child=row.parent == row.child,
                 depth=row.depth,
             )
             self.insert(record)
@@ -239,7 +233,7 @@ class NodeTreeRepository(Repository):
             self.select(cols=NodeTreeRecord.parent)
             .where(NodeTreeRecord.tenant, "=", id_tenant)
             .where(NodeTreeRecord.tree_type, "=", id_tree_type)
-            .where(NodeTreeRecord.child, "in", Literal("({})".format(parents)))
+            .where(NodeTreeRecord.child, "in", Literal(f"({parents})"))
         )
 
         qry = (
@@ -280,10 +274,7 @@ class NodeTreeRepository(Repository):
             .where(NodeTreeRecord.parent, "=", id_node)
             .where(NodeTreeRecord.child, "<>", id_node)
         )
-        result = []
-        for row in self.fetch(qry):
-            result.append(row.child)
-        return result
+        return [row.child for row in self.fetch(qry)]
 
     def get_all_parents(self, id_tenant: int, id_tree_type: int, id_node: int) -> List:
         """
@@ -301,10 +292,7 @@ class NodeTreeRepository(Repository):
             .where(NodeTreeRecord.child, "=", id_node)
             .where(NodeTreeRecord.parent, "<>", id_node)
         )
-        result = []
-        for row in self.fetch(qry):
-            result.append(row.parent)
-        return result
+        return [row.parent for row in self.fetch(qry)]
 
     def get_all_children_parents(
         self, id_tenant: int, id_tree_type: int, id_node: int

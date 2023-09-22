@@ -219,9 +219,7 @@ class ContainerService(Injectable):
         """
         node_type = self.repo_node_type().fetch_pk(id_node_type)  # type: NodeTypeRecord
         if not node_type:
-            raise NodeTypeNotFoundError(
-                "invalid node type: {}".format(str(id_node_type))
-            )
+            raise NodeTypeNotFoundError(f"invalid node type: {id_node_type}")
 
         if not attributes:
             attributes = {}
@@ -297,10 +295,10 @@ class ContainerService(Injectable):
         repo_node = self.repo_node()
         node = repo_node.fetch_pk(id_node)  # type: NodeRecord
         if not node:
-            raise NodeNotFoundError("invalid node id {}".format(str(id_node)))
+            raise NodeNotFoundError(f"invalid node id {id_node}")
 
         if not self.repo_tree().delete_node(node.tenant, node.tree_type, id_node):
-            raise NodeError("cannot remove node id {}".format(str(id_node)))
+            raise NodeError(f"cannot remove node id {id_node}")
 
         self.repo_node().delete_pk(id_node)
 
@@ -341,11 +339,8 @@ class ContainerService(Injectable):
         if not fetch_records:
             return result
 
-        record_result = {}
         repo = self.repo_node()
-        for k, v in result.items():
-            record_result[repo.fetch_pk(k)] = v
-        return record_result
+        return {repo.fetch_pk(k): v for k, v in result.items()}
 
     def get_node_list(self, id_tenant: int, id_tree_type: int) -> List[NodeRecord]:
         """
