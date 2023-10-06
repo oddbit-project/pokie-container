@@ -48,11 +48,14 @@ class TestPlatform:
 
         records = svc_container.get_node_type_list(TREE_DEFAULT)
         assert len(records) == 2
-        assert isinstance(records[0], NodeTypeRecord) is True
-
-        node = records[0]
-        assert node.id == id_type
-        assert node.label == label
+        found = False
+        for r in records:
+            assert isinstance(r, NodeTypeRecord) is True
+            assert r.id in [1, id_type]
+            if r.id == 10:
+                found = True
+                assert r.label == label
+        assert found is True
 
         result = svc_container.remove_node_type(id_type)
         assert result is True
