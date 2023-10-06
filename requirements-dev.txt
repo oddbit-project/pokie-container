@@ -1,12 +1,7 @@
-rick_db>=1.1.2
-rick>=0.6.0
-pokie>=0.4.0
 pytest-pokie
-pytest==7.1.2
+pytest==7.3.1
+pytest-cov==4.0.0
 pytest-testdox==3.0.1
-pytest-cov==3.0.0
-coverage==6.4.4
-flake8==5.0.4
-setuptools~=60.0.0
+flake8
 tox==3.26.0
 tox-docker==3.1.0

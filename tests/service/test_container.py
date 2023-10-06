@@ -48,9 +48,9 @@ class TestPlatform:
 
         records = svc_container.get_node_type_list(TREE_DEFAULT)
         assert len(records) == 2
-        assert isinstance(records[1], NodeTypeRecord) is True
+        assert isinstance(records[0], NodeTypeRecord) is True
 
-        node = records[1]
+        node = records[0]
         assert node.id == id_type
         assert node.label == label
 
