@@ -1,6 +1,4 @@
-from flask import Blueprint
 from pokie.core import BaseModule
-from pokie.http import route_resource, route_controller
 
 from pokie_container.constants import SVC_CONTAINER
 

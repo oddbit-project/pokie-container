@@ -1,11 +1,11 @@
 from rick.resource.config import EnvironmentConfig
-from pokie.config.template import BaseConfigTemplate, PgConfigTemplate, TestConfigTemplate
+from pokie.config import PokieConfig
 from pokie.core import FlaskApplication
 from pokie.core.factories.pgsql import PgSqlFactory
 
 
 # base configuration
-class Config(EnvironmentConfig, BaseConfigTemplate, PgConfigTemplate, TestConfigTemplate):
+class Config(EnvironmentConfig, PokieConfig):
     TEST_MANAGE_DB = True
     TEST_DB_SSL = False
 

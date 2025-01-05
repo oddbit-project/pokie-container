@@ -1,7 +1,8 @@
+from contextlib import contextmanager
 from typing import Union, List, Optional
 
 from rick.util.datetime import iso8601_now
-from rick_db import Repository
+from rick_db import Repository, RepositoryError, Connection
 from rick_db.sql import Literal, Select
 
 from pokie_container.dto import (
@@ -62,6 +63,63 @@ class NodeRepository(Repository):
 class NodeTreeRepository(Repository):
     def __init__(self, db):
         super().__init__(db, NodeTreeRecord)
+        self._transaction = None
+
+    @contextmanager
+    def conn(self) -> Connection:
+        # if a current repository transaction is running, yield that connection instead
+        if self._transaction:
+            yield self._transaction
+            return
+
+        if self._db:
+            yield self._db
+
+        if self._pool:
+            try:
+                conn = self._pool.getconn()
+                yield conn
+            finally:
+                self._pool.putconn(conn)
+
+    def begin(self):
+        """
+        Initiates a transaction
+        Transaction semantics is valid only within the current Repository; However, if a Repository
+        is initialized from a Connection, other Repositories using the same connection may suffer side effects
+        :return:
+        """
+        if self._transaction:
+            raise RepositoryError("repository already in a transaction")
+        if self._db:
+            self._transaction = self._db
+        elif self._pool:
+            self._transaction = self._pool.getconn()
+        self._transaction.begin()
+
+    def commit(self):
+        """
+        Commits the current transaction
+        :return:
+        """
+        if self._transaction is None:
+            raise RepositoryError("repository is not in a transaction")
+        self._transaction.commit()
+        if self._pool:
+            self._pool.putconn(self._transaction)
+        self._transaction = None
+
+    def rollback(self):
+        """
+        Rolls back the current transaction
+        :return:
+        """
+        if self._transaction is None:
+            raise RepositoryError("repository is not in a transaction")
+        self._transaction.rollback()
+        if self._pool:
+            self._pool.putconn(self._transaction)
+        self._transaction = None
 
     def add_node(
         self,
@@ -74,7 +132,9 @@ class NodeTreeRepository(Repository):
             id_parent_node = [id_parent_node]
 
         depth = 0
-        self._db.begin()
+
+
+        self.begin()
         for id_parent in id_parent_node:
             qry = (
                 self.select()
@@ -104,7 +164,7 @@ class NodeTreeRepository(Repository):
             depth=depth,
         )
         self.insert(record)
-        self._db.commit()
+        self.commit()
         return True
 
     def get_by_node(
@@ -183,7 +243,7 @@ class NodeTreeRepository(Repository):
         if node.depth != parent.depth + 1:
             return False
 
-        self._db.begin()
+        self.begin()
         subqry = (
             self.select(cols=NodeTreeRecord.parent)
             .where(NodeTreeRecord.tenant, "=", id_tenant)
@@ -208,7 +268,7 @@ class NodeTreeRepository(Repository):
                 depth=row.depth,
             )
             self.insert(record)
-        self._db.commit()
+        self.commit()
         return True
 
     def delete_parent(
@@ -251,7 +311,7 @@ class NodeTreeRepository(Repository):
             .where(NodeTreeRecord.parent, "not in ", subqry)
         )
 
-        self._db.begin()
+        self.begin()
         for row in self.fetch(qry):
             self.delete_where(
                 [
@@ -262,7 +322,7 @@ class NodeTreeRepository(Repository):
                     (NodeTreeRecord.depth, "=", row.depth),
                 ]
             )
-        self._db.commit()
+        self.commit()
         return True
 
     def get_all_children(self, id_tenant: int, id_tree_type: int, id_node: int) -> List:
@@ -363,9 +423,9 @@ class NodeTreeRepository(Repository):
         :param id_tree_type:
         :return:
         """
-        tn = self._tablename
+        tn = self.table_name
         qry = (
-            Select(self._dialect)
+            Select(self.dialect)
             .from_(
                 {tn: "a"},
                 cols={
@@ -387,7 +447,7 @@ class NodeTreeRepository(Repository):
                         )
                     ): "nodes",
                 },
-                schema=self._schema,
+                schema=self.schema,
             )
             .where(NodeTreeRecord.tenant, "=", id_tenant)
             .where(NodeTreeRecord.tree_type, "=", id_tree_type)
